@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-statefulset
+  namespace: myapp-namespace
+spec:
+  selector:
+    app: db-statefulset  # Make sure this label matches your StatefulSet's label selector
+  ports:
+    - protocol: TCP
+      port: 5432  # Default port for PostgreSQL
+      targetPort: 5432
+  clusterIP: None  # Important for StatefulSets to allow DNS resolution of individual pods
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db-statefulset
+  namespace: myapp-namespace
+spec:
+  serviceName: db-statefulset  # This is important to ensure proper DNS resolution for StatefulSet pods
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-statefulset
+  template:
+    metadata:
+      labels:
+        app: db-statefulset
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15  # Replace with your desired image version
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: maky123
+            - name: POSTGRES_DB
+              value: kii
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

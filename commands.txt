@@ -1,0 +1,15 @@
+docker-compose up --build
+docker-compose up
+
+kubectl create namespace myapp-namespace
+kubectl apply -f db-statefulset.yml -n myapp-namespace
+kubectl apply -f app-deployment.yml -n myapp-namespace
+kubectl apply -f app-service.yml -n myapp-namespace
+kubectl apply -f app-ingress.yaml -n myapp-namespace
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+kubectl port-forward pod/app-5fc646cbb6-6d77l 8080:8080 -n myapp-namespace
+
+kubectl get pods -n myapp-namespace
+kubectl get services -n myapp-namespace
+kubectl get deployments -n myapp-namespace
+kubectl get ingress -n myapp-namespace
